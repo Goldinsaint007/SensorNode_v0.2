@@ -1,0 +1,32 @@
+ESP32 IR Blast - Server
+
+Boot-up procedure and layout:
+    Initialize the ESP32 board and the WiFi module.
+    Check if there are saved WiFi credentials in the EEPROM.
+    If there are saved credentials, connect to the WiFi network and start the loop.
+    If there are no saved credentials, initialize the Bluetooth LE module and wait for a new connection
+    to receive the WiFi details and passphrase.
+
+Loop:
+    Check for new sensor devices on the network and prompt to add new devices.
+    Check if previously added devices are still connected every 30 minutes.
+    If a device is disconnected, remove it from the list of client devices.
+    Listen for incoming connections from the Android app.
+    If a connection is established and the app requests to capture an IR code, capture the IR code from the remote control and save it on the SD card.
+    If a connection is established and the app requests to send a saved IR code, send the saved IR code over IR to the aircon.
+    Update the state of the device and show it with an RGB LED.
+
+Add client devices:
+    Look for new client sensor devices on the network.
+    Prompt a request to add the client device.
+    Check if the passphrase matches the one on the client.
+    Add the client device to the list of devices.
+    Let the client know that it should look to this server to communicate over WiFi.
+
+Monitor client device connectivity:
+    Check if the client devices are still connected every 30 minutes.
+    If a device is disconnected, remove it from the list of client devices.
+
+RGB LED feedback:
+    Show the state of the device with an RGB LED inside all functions.
+    Use different colors to indicate different states of the device, such as boot-up, connected, disconnected, etc.
