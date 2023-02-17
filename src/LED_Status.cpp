@@ -28,7 +28,7 @@ void StatusLED::SetStatus(LEDStatus status, bool alsoDrive, unsigned long wait) 
             setActiveLED('g', true, 2, 200);
             drive();
             setActiveLED('b', true, 2, 200);
-            drive();
+            //drive();
             break;
 
 /*** BLE *** BLE *** BLE *** BLE *** BLE *** BLE *** BLE *** BLE *** BLE *** BLE *** BLE *** BLE ***/
@@ -45,10 +45,22 @@ void StatusLED::SetStatus(LEDStatus status, bool alsoDrive, unsigned long wait) 
             setActiveLED('r', true, 3);
             break;
         case BLE_SEND:
-            setActiveLED('g', true, 4);
+            setActiveLED('r', true, 1, 200);
+            drive();
+            setActiveLED('b', true, 1, 200);
+            drive();
+            setActiveLED('r', true, 1, 200);
+            drive();
+            setActiveLED('b');
             break;
         case BLE_RECEIVE:
-            setActiveLED('g', true, 4);
+            switchOff();
+            wait = 500;
+            setActiveLED('g', true, 1, 200);
+            drive();
+            setActiveLED('b', true, 1, 200);
+            drive();
+            setActiveLED('g', true, 1, 200);
             break;
 
 /*** WI-FI *** WI-FI *** WI-FI *** WI-FI *** WI-FI *** WI-FI *** WI-FI *** WI-FI *** WI-FI *** WI-FI ***/

@@ -8,16 +8,16 @@
 bool r = false;
 bool s = false;
 
-void ble_receive() {
+void ble_receive(String uuid) {
   r = true;
 }
 
-void ble_send() {
+void ble_send(String uuid) {
   s = true;
 }
 
-typedef void (*_recieve)();
-typedef void (*_send)();
+typedef void (*_recieve)(String uuid);
+typedef void (*_send)(String uuid);
 
 class MyServerCallbacks : public BLEServerCallbacks {
   public:
@@ -43,22 +43,31 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
 
     // Callback function for when a write event occurs on the characteristic
     void onWrite(BLECharacteristic *pCharacteristic) {
+      String replyValue = ""; 
+      String uid = pCharacteristic->getUUID().toString().c_str();
+      if(uid == CHARACTERISTIC_UUID_SSID) {
+        replyValue = "SSID ";
+      }
+      if(uid == CHARACTERISTIC_UUID_PASSWORD) {
+        replyValue = "PASS ";
+      }
+
       // Get the string value of the written data
       std::string value = pCharacteristic->getValue();
       
-      recv();
+      recv(uid);
 
       // If the value is not empty, the data was received successfully
       if (!value.empty()) {
           // Send a notification indicating that the data was received successfully
-          pNotifyCharacteristic->setValue("Data received  ");
+          pNotifyCharacteristic->setValue(replyValue + "Good\0");
           pNotifyCharacteristic->notify();
-          snd();
+          snd(uid);
       } else {
           // Send a notification indicating that the data was not received successfully
-          pNotifyCharacteristic->setValue("Data not received");
+          pNotifyCharacteristic->setValue(replyValue + "Bad\0");
           pNotifyCharacteristic->notify();
-          snd();
+          snd(uid);
       }
     }
 
@@ -87,7 +96,11 @@ void BLEController::init() {
 
   mscb = new MyServerCallbacks();
   ssidCallback = new MyCharacteristicCallbacks();
+  ssidCallback->recv = ble_receive;
+  ssidCallback->snd = ble_send;
   passwordCallback = new MyCharacteristicCallbacks();
+  passwordCallback->recv = ble_receive;
+  passwordCallback->snd = ble_send;
 
 #ifdef EASYDEBUG
   delay(100);
@@ -235,7 +248,7 @@ void BLEController::GetWiFi() {
       password = pPasswordCharacteristic->getValue();
 
 #ifdef EASYDEBUG
-    if(ssid != "" && !_pass) {
+    if(password != "" && !_pass) {
       delay(100);
       Serial.println("BLE - Password :" + String(password.c_str()));
       _pass = true;
