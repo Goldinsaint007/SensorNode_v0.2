@@ -1,8 +1,8 @@
 #include <BLE_Controller.h>
 
 #ifdef EASYDEBUG
-  bool _ssid = false;
-  bool _pass = false;
+bool _ssid = false;
+bool _pass = false;
 #endif 
 
 bool r = false;
@@ -90,7 +90,6 @@ void BLEController::init() {
   led.SetStatus(BLE_INIT);
 
 #ifdef EASYDEBUG
-  delay(100);
   Serial.println("BLE - intitalizing...");
 #endif 
 
@@ -103,7 +102,6 @@ void BLEController::init() {
   passwordCallback->snd = ble_send;
 
 #ifdef EASYDEBUG
-  delay(100);
   Serial.print("BLE - Start with name :");
   Serial.println(DEVICE_NAME);
 #endif
@@ -112,7 +110,6 @@ void BLEController::init() {
   BLEDevice::init(DEVICE_NAME);
 
 #ifdef EASYDEBUG
-  delay(100);
   Serial.println("BLE - Creating server...");
 #endif 
 
@@ -120,7 +117,6 @@ void BLEController::init() {
   pServer = BLEDevice::createServer();
 
 #ifdef EASYDEBUG
-  delay(100);
   Serial.print("BLE - Creating service with UUID :");
   Serial.println(SERVICE_UUID);
 #endif
@@ -129,7 +125,6 @@ void BLEController::init() {
   BLEService *pService = pServer->createService(SERVICE_UUID);
 
 #ifdef EASYDEBUG
-  delay(100);
   Serial.println("BLE - Creating characteristic for (WIFI SSID) with write property...");
   Serial.print("BLE - UUID :");
   Serial.println(CHARACTERISTIC_UUID_SSID);
@@ -142,7 +137,6 @@ void BLEController::init() {
   pSsidCharacteristic->setCallbacks(ssidCallback);
 
 #ifdef EASYDEBUG
-  delay(100);
   Serial.println("BLE - Creating characteristic for (WIFI password) with write property...");
   Serial.print("BLE - UUID :");
   Serial.println(CHARACTERISTIC_UUID_PASSWORD);
@@ -155,7 +149,6 @@ void BLEController::init() {
   pPasswordCharacteristic->setCallbacks(passwordCallback);
 
 #ifdef EASYDEBUG
-  delay(100);
   Serial.println("BLE - Creating characteristic for (Notifications) with notify property...");
   Serial.print("BLE - UUID :");
   Serial.println(CHARACTERISTIC_UUID_NOTIFY);
@@ -169,7 +162,6 @@ void BLEController::init() {
   passwordCallback->setNotifyCharacteristic(pNotifyCharacteristic);
 
 #ifdef EASYDEBUG
-  delay(100);
   Serial.println("BLE - Start the service...");
 #endif 
 
@@ -177,14 +169,12 @@ void BLEController::init() {
   pService->start();
 
 #ifdef EASYDEBUG
-  delay(100);
   Serial.println("BLE - Start advertising...");
 #endif 
 
   pServer->getAdvertising()->start();
 
 #ifdef EASYDEBUG
-  delay(100);
   Serial.println("BLE - Set the callbacks for the server...");
 #endif 
 
@@ -210,10 +200,8 @@ void BLEController::init() {
  */
 void BLEController::GetWiFi() {
 #ifdef EASYDEBUG
-  delay(100);
   Serial.println("BLE - Start looking for credentials...");
-#endif 
-
+#endif
   // Store the start time in milliseconds
   unsigned long startTime = millis();
 
@@ -239,7 +227,6 @@ void BLEController::GetWiFi() {
 
 #ifdef EASYDEBUG
     if(ssid != "" && !_ssid) {
-      delay(100);
       Serial.println("BLE - SSID :" + String(ssid.c_str()));
       _ssid = true;
     }
@@ -249,24 +236,26 @@ void BLEController::GetWiFi() {
 
 #ifdef EASYDEBUG
     if(password != "" && !_pass) {
-      delay(100);
       Serial.println("BLE - Password :" + String(password.c_str()));
       _pass = true;
     }
 #endif 
     }
 
-    // Check if 2 minutes have passed since the start time
-    if (millis() - startTime >= 2 * 60 * 1000) {
+    // Check if BLE_REBOOT_TIMEOUT_MINUTES have passed since the start time
+    if (millis() - startTime >= BLE_REBOOT_TIMEOUT_MINUTES * 60 * 1000) {
 #ifdef EASYDEBUG
-      delay(100);
       Serial.println("BLE - Looking for connection timed out rebooting...");
-      delay(1000);
 #endif 
       // ESP Restart
       ESP.restart();
     }
   }
+
+#ifdef EASYDEBUG
+      Serial.println("BLE - credentials recieved now start storing it...");
+      delay(1000);
+#endif 
 
   // Store the Wi-Fi credentials in the WifiCredentials object
   wifi.saveCredentials(WiFiCredentials(ssid, password));
@@ -274,7 +263,6 @@ void BLEController::GetWiFi() {
   // Check if the Wi-Fi credentials have been initialized
   if (wifi.hasCredentials()) {
 #ifdef EASYDEBUG
-    delay(100);
     Serial.println("BLE - WIFI credentials recived and stored rebooting...");
     delay(1000);
 #endif 

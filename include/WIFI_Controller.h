@@ -33,8 +33,6 @@ class WifiController {
     public:
         WifiController(StatusLED &sLED) : led(sLED) {};
         void init();
-        void saveCredentials(WiFiCredentials credentials);
-        WiFiCredentials loadCredentials();
         bool connect();
         void checkIncomingClients();
         bool isWiFiConnected();
@@ -43,8 +41,10 @@ class WifiController {
         int receiveMessage(String& message);
         bool hasCredentials();
         void set_initialized(bool state);
+        void saveCredentials(WiFiCredentials credentials);
 
     private:
+        WiFiCredentials loadCredentials();
         void setupUDP();
         void clearCredentials();
         bool get_initialized();

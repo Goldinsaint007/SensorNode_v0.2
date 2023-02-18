@@ -1,6 +1,7 @@
 #ifndef BLE_CONFIG_H
 #define BLE_CONFIG_H
 
+static constexpr int BLE_REBOOT_TIMEOUT_MINUTES         = 5;
 static constexpr char DEVICE_NAME[]                     = "IRBlastV2";
 static constexpr char SERVICE_UUID[]                    = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
 static constexpr char CHARACTERISTIC_UUID_SSID[]        = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";

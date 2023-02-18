@@ -14,6 +14,12 @@
 
 #include <WIFI_Controller.h>
 
+#ifdef EASYDEBUG
+void log(String data) {
+
+};
+#endif
+
 #pragma region WifiController::init()
 /**
  * @brief Initialize the WifiController instance
@@ -25,9 +31,15 @@
  * @return none
  */
 void WifiController::init() {
+#ifdef EASYDEBUG
+    Serial.println("WiFi - Initializing...");
+#endif
     delay(10); // Delay for 10 milliseconds
     EEPROM.begin(EEPROM_SIZE); // Begin the EEPROM with the specified size
     led.SetStatus(WIFI_INIT, true, 500); // Set the WIFI_INIT status of the LED
+#ifdef EASYDEBUG
+    Serial.println("WiFi - Initialized...");
+#endif
 }
 #pragma endregion
 
@@ -42,6 +54,9 @@ void WifiController::init() {
  * @return An integer indicating the number of bytes sent. Returns 0 if the sending process fails.
  */
 int WifiController::sendMessage(String& message) {
+#ifdef EASYDEBUG
+    Serial.println("WiFi - Sending message with data :" + message);
+#endif
     int result = 0;
     // Begin sending a packet to the specified client's IP address and port
     if (udp.beginPacket(client.ip, client.port)) {
@@ -52,6 +67,13 @@ int WifiController::sendMessage(String& message) {
             result = 0; // Return 0 if the packet was not successfully sent
         }
     }
+#ifdef EASYDEBUG
+    if(result == 0) {
+        Serial.println("WiFi - Sending message failed...");
+    } else {
+        Serial.println("WiFi - Sending message done...");
+    }
+#endif
     return result;
 }
 #pragma endregion
@@ -72,13 +94,22 @@ int WifiController::sendMessage(String& message) {
 int WifiController::receiveMessage(String& receivedMsg) {
     int packetSize = udp.parsePacket(); // Get the size of the incoming packet
     if (packetSize) { // If the packet is not empty
+#ifdef EASYDEBUG
+        Serial.println("WiFi - Recieving message...");
+#endif
         IPAddress senderIP = udp.remoteIP(); // Retrieve the sender's IP address
+#ifdef EASYDEBUG
+        Serial.println("WiFi - On client IP :" + senderIP.toString());
+#endif
         // Check if the last octet of the sender IP is not 255 and that it's different from the local IP address
         if (senderIP[3] != 255 && senderIP[3] != WiFi.localIP()[3]) {
             char buffer[packetSize + 1]; // Create a buffer to store the received message
             int len = udp.read((unsigned char*) buffer, packetSize); // Read the packet
             buffer[len] = '\0'; // Terminate the string
             receivedMsg = String(buffer); // Store the received message in the input
+#ifdef EASYDEBUG
+            Serial.println("WiFi - Message recived :" + receivedMsg);
+#endif
             return packetSize; // Return the size of the packet
         }
     }
@@ -110,8 +141,7 @@ void WifiController::checkIncomingClients() {
             client.port = udp.remotePort(); // Store the sender's port in the `client` object
             connected = true; // Set the `connected` flag to `true`
             Serial.println("client ip: " + client.ip.toString() + " client port: " + String(client.port));
-            String msg;
-            msg += "Hello";
+            String msg = "Hello\0";
             sendMessage(msg); // Send a message back to the client
             lastPingTime = millis(); // Update the value of `lastPingTime`
         }
